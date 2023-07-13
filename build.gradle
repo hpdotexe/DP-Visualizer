@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+    id 'war'
+    id 'idea'
+}
+
+group 'com.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    junitVersion = '5.9.2'
+}
+
+sourceCompatibility = '17'
+targetCompatibility = '17'
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    compileOnly('jakarta.servlet:jakarta.servlet-api:5.0.0')
+    implementation 'org.projectlombok:lombok:1.18.28'
+    implementation 'org.springframework:spring-context:6.0.9'
+    implementation 'org.springframework:spring-webmvc:6.0.9'
+    implementation 'io.leangen.graphql:spqr:0.12.2'
+    implementation 'org.springframework.data:spring-data-mongodb:4.1.0'
+    implementation 'org.mongodb:mongo-java-driver:3.12.14'
+    implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.3'
+    implementation 'org.codehaus.jackson:jackson-mapper-asl:1.9.13'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'org.json:json:20230227'
+    implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+    implementation 'com.microsoft.azure:azure-storage:8.6.2'
+    implementation 'com.auth0:jwks-rsa:0.18.0'
+    implementation 'com.auth0:java-jwt:3.16.0'
+    implementation 'commons-codec:commons-codec:1.15'
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+}
+
+test {
+    useJUnitPlatform()
+}
