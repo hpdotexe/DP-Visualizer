@@ -1,4 +1,4 @@
-package com.sprinklr.graphqlxmongoxspring.resolver;
+package com.sprinklr.graphqlxmongoxspring.api;
 
 import com.sprinklr.graphqlxmongoxspring.model.Property;
 import com.sprinklr.graphqlxmongoxspring.model.Ticket;
@@ -13,13 +13,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class DPResolver {
+public class GraphqlAPI {
     @Autowired
     IMongoService mongoService;
     @Autowired
     ITicketService ticketService;
 
-    public DPResolver(IMongoService mongoService, ITicketService ticketService) {
+    public GraphqlAPI(IMongoService mongoService, ITicketService ticketService) {
         this.mongoService = mongoService;
         this.ticketService = ticketService;
     }

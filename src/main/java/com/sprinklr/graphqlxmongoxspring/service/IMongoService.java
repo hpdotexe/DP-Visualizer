@@ -3,9 +3,7 @@ package com.sprinklr.graphqlxmongoxspring.service;
 import com.sprinklr.graphqlxmongoxspring.model.DPData;
 import com.sprinklr.graphqlxmongoxspring.model.Property;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public interface IMongoService {
     List<DPData> getAllDPs();

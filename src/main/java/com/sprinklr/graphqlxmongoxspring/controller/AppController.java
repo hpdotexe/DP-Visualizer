@@ -1,7 +1,7 @@
 package com.sprinklr.graphqlxmongoxspring.controller;
 
-import com.sprinklr.graphqlxmongoxspring.resolver.DPResolver;
-import com.sprinklr.graphqlxmongoxspring.resolver.DPResolverAdmin;
+import com.sprinklr.graphqlxmongoxspring.api.GraphqlAPI;
+import com.sprinklr.graphqlxmongoxspring.api.GraphqlAdminAPI;
 import com.sprinklr.graphqlxmongoxspring.service.AuthService;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
@@ -24,16 +24,16 @@ public class AppController {
     private final GraphQL graphQLAdmin;
     private static final Logger logger = Logger.getLogger("AppController.class");
     @Autowired
-    public AppController(DPResolver dpResolver, DPResolverAdmin dpResolverAdmin) {
+    public AppController(GraphqlAPI graphqlAPI, GraphqlAdminAPI graphqlAdminAPI) {
         GraphQLSchema querySchema = new GraphQLSchemaGenerator()
                 .withBasePackages("com.sprinklr.graphqlxmongoxspring")
-                .withOperationsFromSingleton(dpResolver)
+                .withOperationsFromSingleton(graphqlAPI)
                 .generate();
         this.graphQL = new GraphQL.Builder(querySchema).build();
 
         GraphQLSchema mutationSchema = new GraphQLSchemaGenerator()
                 .withBasePackages("com.sprinklr.graphqlxmongoxspring")
-                .withOperationsFromSingleton(dpResolverAdmin)
+                .withOperationsFromSingleton(graphqlAdminAPI)
                 .generate();
         this.graphQLAdmin = new GraphQL.Builder(mutationSchema).build();
     }

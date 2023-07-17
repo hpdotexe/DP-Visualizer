@@ -1,6 +1,5 @@
 package com.sprinklr.graphqlxmongoxspring.service;
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.*;
@@ -47,27 +46,21 @@ public class MongoService implements IMongoService {
         Set<DPData> propertySet = new HashSet<>();
         FindIterable<DPData> DPs = collection.find();
         for(DPData dp:DPs){
-            if(!dp.getProperty().contains("-ALL_PARTNERS")) propertySet.add(dp);
+            if(!dp.getProperty().contains("_ALL-PARTNERS")) propertySet.add(dp);
         }
-        List<DPData> list = new ArrayList<>(propertySet);
-        return list;
+        return new ArrayList<>(propertySet);
     }
 
     @Override
     public List<Property> getPropWithTags(String tags){
-        ConnectionString connectionString = new ConnectionString(MONGO_URI);
-        CodecRegistry pojoCodecRegistry = fromProviders(PojoCodecProvider.builder().automatic(true).build());
-        CodecRegistry codecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry);
-        MongoClientSettings clientSettings = MongoClientSettings.builder()
-                .applyConnectionString(connectionString)
-                .codecRegistry(codecRegistry)
-                .build();
-        MongoClient mongoClient = MongoClients.create(clientSettings);
-        MongoCollection<Property> propCollection= mongoClient.getDatabase(MONGO_DATABASE).getCollection("Properties", Property.class);
+        MongoClient mongoClient = getMongoClient();
+        MongoDatabase db = mongoClient.getDatabase(MONGO_DATABASE);
+        MongoCollection<Property> propCollection= db.getCollection("Properties", Property.class);
         String[] tagArray = tags.replaceAll(" ","").split(",");
         FindIterable<Property> props = propCollection.find(all("tags",tagArray));
         List<Property> list = new ArrayList<>();
         for(Property prop:props) list.add(prop);
+        mongoClient.close();
         return list;
     }
 
@@ -195,6 +188,12 @@ public class MongoService implements IMongoService {
         return list;
     }
     private static MongoCollection<DPData> initializeData() {
+        MongoClient mongoClient = getMongoClient();
+        MongoDatabase db = mongoClient.getDatabase(MONGO_DATABASE);
+        return db.getCollection(MONGO_COLLECTION_DP, DPData.class);
+    }
+
+    private static MongoClient getMongoClient(){
         ConnectionString connectionString = new ConnectionString(MONGO_URI);
         CodecRegistry pojoCodecRegistry = fromProviders(PojoCodecProvider.builder().automatic(true).build());
         CodecRegistry codecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry);
@@ -202,9 +201,7 @@ public class MongoService implements IMongoService {
                 .applyConnectionString(connectionString)
                 .codecRegistry(codecRegistry)
                 .build();
-        MongoClient mongoClient = MongoClients.create(clientSettings);
-        MongoDatabase db = mongoClient.getDatabase(MONGO_DATABASE);
-        return db.getCollection(MONGO_COLLECTION_DP, DPData.class);
+        return  MongoClients.create(clientSettings);
     }
 
     List<DPData> FindIterableToList(FindIterable<DPData> DPs) {
