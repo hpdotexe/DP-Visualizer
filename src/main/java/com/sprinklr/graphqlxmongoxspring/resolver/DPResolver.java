@@ -1,17 +1,16 @@
 package com.sprinklr.graphqlxmongoxspring.resolver;
 
+import com.sprinklr.graphqlxmongoxspring.model.Property;
 import com.sprinklr.graphqlxmongoxspring.model.Ticket;
 import com.sprinklr.graphqlxmongoxspring.service.IMongoService;
 import com.sprinklr.graphqlxmongoxspring.model.DPData;
 import com.sprinklr.graphqlxmongoxspring.service.ITicketService;
 import io.leangen.graphql.annotations.GraphQLArgument;
-import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class DPResolver {
@@ -47,6 +46,8 @@ public class DPResolver {
     @GraphQLQuery(name = "getDPWithPartnerAndClient")
     public List<DPData> getDPWithPartnerAndClient(@GraphQLArgument(name = "prop") DPData dp){return mongoService.getDPWithPartnerAndClient(dp);}
 
+    @GraphQLQuery(name = "getPropertyWithTags")
+    public List<Property> getPropByTags(@GraphQLArgument(name="tags")String tags){return mongoService.getPropWithTags(tags);}
     //------------------------TICKET QUERIES--------------------------
 
     @GraphQLQuery(name= "getUserTickets")

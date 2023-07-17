@@ -1,18 +1,19 @@
 package com.sprinklr.graphqlxmongoxspring.service;
 
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Sorts;
 import com.sprinklr.graphqlxmongoxspring.model.DPData;
+import com.sprinklr.graphqlxmongoxspring.model.Property;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.*;
 import static com.sprinklr.graphqlxmongoxspring.model.Constants.*;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -49,6 +50,24 @@ public class MongoService implements IMongoService {
             if(!dp.getProperty().contains("-ALL_PARTNERS")) propertySet.add(dp);
         }
         List<DPData> list = new ArrayList<>(propertySet);
+        return list;
+    }
+
+    @Override
+    public List<Property> getPropWithTags(String tags){
+        ConnectionString connectionString = new ConnectionString(MONGO_URI);
+        CodecRegistry pojoCodecRegistry = fromProviders(PojoCodecProvider.builder().automatic(true).build());
+        CodecRegistry codecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry);
+        MongoClientSettings clientSettings = MongoClientSettings.builder()
+                .applyConnectionString(connectionString)
+                .codecRegistry(codecRegistry)
+                .build();
+        MongoClient mongoClient = MongoClients.create(clientSettings);
+        MongoCollection<Property> propCollection= mongoClient.getDatabase(MONGO_DATABASE).getCollection("Properties", Property.class);
+        String[] tagArray = tags.replaceAll(" ","").split(",");
+        FindIterable<Property> props = propCollection.find(all("tags",tagArray));
+        List<Property> list = new ArrayList<>();
+        for(Property prop:props) list.add(prop);
         return list;
     }
 

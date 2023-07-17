@@ -1,11 +1,13 @@
 package com.sprinklr.graphqlxmongoxspring.model;
 
 import lombok.Data;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.springframework.data.annotation.Id;
 
 @Data
 public class Ticket {
     @Id
+    @BsonProperty("_id")
     private String id;
     private String createdBy;
     private double creationTime;
