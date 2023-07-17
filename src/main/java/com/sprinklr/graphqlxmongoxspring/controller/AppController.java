@@ -1,6 +1,7 @@
 package com.sprinklr.graphqlxmongoxspring.controller;
 
 import com.sprinklr.graphqlxmongoxspring.resolver.DPResolver;
+import com.sprinklr.graphqlxmongoxspring.resolver.DPResolverAdmin;
 import com.sprinklr.graphqlxmongoxspring.service.AuthService;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
@@ -20,35 +21,54 @@ import java.util.logging.Logger;
 @RequestMapping("/")
 public class AppController {
     private final GraphQL graphQL;
+    private final GraphQL graphQLAdmin;
     private static final Logger logger = Logger.getLogger("AppController.class");
     @Autowired
-    public AppController(DPResolver dpResolver) {
+    public AppController(DPResolver dpResolver, DPResolverAdmin dpResolverAdmin) {
         GraphQLSchema querySchema = new GraphQLSchemaGenerator()
                 .withBasePackages("com.sprinklr.graphqlxmongoxspring")
                 .withOperationsFromSingleton(dpResolver)
                 .generate();
         this.graphQL = new GraphQL.Builder(querySchema).build();
+
+        GraphQLSchema mutationSchema = new GraphQLSchemaGenerator()
+                .withBasePackages("com.sprinklr.graphqlxmongoxspring")
+                .withOperationsFromSingleton(dpResolverAdmin)
+                .generate();
+        this.graphQLAdmin = new GraphQL.Builder(mutationSchema).build();
     }
 
     @PostMapping(value="graphql")
     @ResponseBody
     public Map<String, Object> execute(@RequestBody Map<String, String> request)
             throws GraphQLException {
-        if(AuthService.validateToken(request.get("token"))) {
+        if(AuthService.validateToken(request.get("token")) && AuthService.hasViewAccess(request.get("token"))) {
             String query = request.get("query");
             logger.info("Query Received! Query: "+query);
-            ExecutionResult result = ExecutionResult.newExecutionResult().build();
-            if(query.contains("mutation")) {
-                if (!AuthService.hasEditAccess(request.get("token"))) {
-                    System.out.println("Ticket raised");
-                    String rawQuery = query.replaceAll("\"","\\\\\\\"");
-                    String ticketCreationQuery="mutation{createTicket(ticket:{createdBy:\""+request.get("upn")+"\" creationTime: "+System.currentTimeMillis()+" query:\""+rawQuery+"\" details: \""+request.get("details")+"\" resolved: false resolutionTime: 0 accepted: false})}";
-                    ExecutionResult ticketResult = graphQL.execute(ticketCreationQuery);
-                    return result.getData();
-                }
-            }
-            result = graphQL.execute(query);
+            ExecutionResult result = graphQL.execute(query);
             logger.info("Query Executed! Result: " + result.getErrors());
+            return result.getData();
+        }else System.out.println("Unauthorized access!");
+        return null;
+    }
+
+    @PostMapping(value="graphqlAdmin")
+    @ResponseBody
+    public Map<String, Object> executeAdmin(@RequestBody Map<String, String> request)
+            throws GraphQLException {
+        if(AuthService.validateToken(request.get("token"))) {
+            String query = request.get("query");
+            logger.info("Admin Query Received!"+query);
+            if (!AuthService.hasEditAccess(request.get("token"))) {
+                System.out.println("Ticket raised");
+                String rawQuery = query.replaceAll("\"","\\\\\\\"");
+                String ticketCreationQuery="mutation{createTicket(ticket:{createdBy:\""+request.get("upn")+"\" creationTime: "+System.currentTimeMillis()+" query:\""+rawQuery+"\" details: \""+request.get("details")+"\" resolved: false resolutionTime: 0 accepted: false})}";
+                ExecutionResult ticketResult = graphQLAdmin.execute(ticketCreationQuery);
+                logger.info("Ticket Query Executed!"+ticketResult);
+                return ticketResult.getData();
+            }
+            ExecutionResult result = graphQLAdmin.execute(query);
+            logger.info("Admin Query Executed!" + result.getErrors());
             return result.getData();
         }else System.out.println("Unauthorized access!");
         return null;

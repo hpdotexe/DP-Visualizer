@@ -3,6 +3,7 @@ package com.sprinklr.graphqlxmongoxspring.service;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.*;
+import com.mongodb.client.model.Sorts;
 import com.sprinklr.graphqlxmongoxspring.model.Ticket;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -28,11 +29,11 @@ public class TicketService implements ITicketService{
     }
 
     @Override
-    public List<Ticket> getAllTickets() {return FindIterableToList(collection.find());}
+    public List<Ticket> getAllTickets() {return FindIterableToList(collection.find().sort(Sorts.descending("creationTime")));}
 
     @Override
     public List<Ticket> getUserTickets(String upn){
-        return FindIterableToList(collection.find(eq("createdBy",upn)));
+        return FindIterableToList(collection.find(eq("createdBy",upn)).sort(Sorts.descending("creationTime")));
     }
 
     @Override

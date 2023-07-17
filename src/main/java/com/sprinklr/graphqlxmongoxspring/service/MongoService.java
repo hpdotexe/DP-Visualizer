@@ -3,6 +3,7 @@ package com.sprinklr.graphqlxmongoxspring.service;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.*;
+import com.mongodb.client.model.Sorts;
 import com.sprinklr.graphqlxmongoxspring.model.DPData;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -32,18 +33,23 @@ public class MongoService implements IMongoService {
 
     @Override
     public List<DPData> getDPWithPartner(String partner) {
-        return FindIterableToList(collection.find(eq("partner", partner)));
+        return FindIterableToList(collection.find(eq("partner", partner)).sort(Sorts.ascending("partner")));
     }
 
     @Override
     public List<DPData> getDPWithProperty(String property) {
-        return FindIterableToList(collection.find(eq("property", property)));
+        return FindIterableToList(collection.find(eq("property", property)).sort(Sorts.descending("partner")));
     }
 
     @Override
     public List<DPData> getAllDPs() {
+        Set<DPData> propertySet = new HashSet<>();
         FindIterable<DPData> DPs = collection.find();
-        return FindIterableToList(DPs);
+        for(DPData dp:DPs){
+            if(!dp.getProperty().contains("-ALL_PARTNERS")) propertySet.add(dp);
+        }
+        List<DPData> list = new ArrayList<>(propertySet);
+        return list;
     }
 
     @Override
