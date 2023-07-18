@@ -15,6 +15,7 @@ import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.sprinklr.graphqlxmongoxspring.model.Constants.*;
+import static com.sprinklr.graphqlxmongoxspring.service.MongoService.preAuthorize;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
@@ -29,15 +30,20 @@ public class TicketService implements ITicketService{
     }
 
     @Override
-    public List<Ticket> getAllTickets() {return FindIterableToList(collection.find().sort(Sorts.descending("creationTime")));}
+    public List<Ticket> getAllTickets() {
+        preAuthorize(new Object(){}.getClass().getEnclosingMethod().getName());
+        return FindIterableToList(collection.find().sort(Sorts.descending("creationTime")));
+    }
 
     @Override
     public List<Ticket> getUserTickets(String upn){
+        preAuthorize(new Object(){}.getClass().getEnclosingMethod().getName());
         return FindIterableToList(collection.find(eq("createdBy",upn)).sort(Sorts.descending("creationTime")));
     }
 
     @Override
     public void resolveTicket(Ticket ticket){
+        preAuthorize(new Object(){}.getClass().getEnclosingMethod().getName());
         Ticket oldTicket = collection.find(eq("_id",ticket.getId())).first();
         ticket.setCreationTime(oldTicket.getCreationTime());
         ticket.setQuery(oldTicket.getQuery());

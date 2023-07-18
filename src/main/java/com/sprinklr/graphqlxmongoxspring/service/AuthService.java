@@ -8,6 +8,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.sprinklr.graphqlxmongoxspring.model.UserDetails;
 import org.json.JSONObject;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -24,7 +25,8 @@ import static com.sprinklr.graphqlxmongoxspring.model.Constants.*;
 
 public class AuthService {
 
-    public static final Map<String, Map<String,String>> sessionInfo = new HashMap<>();
+    private static final Map<String, Map<String,String>> sessionInfo = new HashMap<>();
+    private static final UserDetails currentUserDetails = new UserDetails();
     private static final Logger logger = Logger.getLogger("AppController.class");
 
     public static Map<String,String> getAccessToken(String authCode,String redirect_uri) throws Exception {
@@ -63,6 +65,7 @@ public class AuthService {
 
         System.out.println("Access token: " + accessToken);
         sessionInfo.put(accessToken, userInfo);
+        setCurrentUser(accessToken);
         return userInfo;
     }
 
@@ -95,6 +98,7 @@ public class AuthService {
                 sessionInfo.remove(token);
                 return false;
             }
+            setCurrentUser(token);
             return true;
         }
 
@@ -121,10 +125,6 @@ public class AuthService {
         return false;
     }
 
-    public static boolean hasEditAccess(String token) {
-        return Objects.equals(sessionInfo.get(token).get("permission"), "ReadWrite");
-    }
-
     public static boolean hasViewAccess(String token) {
         return Objects.equals(sessionInfo.get(token).get("permission"), "ReadWrite") ||
                 Objects.equals(sessionInfo.get(token).get("permission"), "Read");
@@ -132,5 +132,16 @@ public class AuthService {
 
     public static boolean isSessionActive(String token) {
         return Double.parseDouble(sessionInfo.get(token).get("exp"))<=(double)System.currentTimeMillis();
+    }
+
+    private static void setCurrentUser(String token){
+        Map<String,String> user = sessionInfo.get(token);
+        currentUserDetails.setName(user.get("name"));
+        currentUserDetails.setUpn(user.get("upn"));
+        currentUserDetails.setPermission(user.get("permission"));
+    }
+
+    public static String getCurrentUserPermission() {
+        return currentUserDetails.getPermission();
     }
 }
