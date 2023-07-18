@@ -6,7 +6,7 @@ import com.sprinklr.graphqlxmongoxspring.model.Property;
 import java.util.List;
 
 public interface IMongoService {
-    List<DPData> getAllDPs();
+    List<Property> getAllProperties();
 
     public List<DPData> getDPWithProperty(String property);
 

@@ -28,8 +28,8 @@ public class GraphqlAPI {
     @GraphQLQuery(name = "getDPWithId")
     public DPData getDPWithId(@GraphQLArgument(name = "id") String id) {return mongoService.getDPWithId(id);}
 
-    @GraphQLQuery(name = "getAllDPs", description = "Get all properties")
-    public List<DPData> getAllDPs() { return mongoService.getAllDPs(); }
+    @GraphQLQuery(name = "getAllProperties", description = "Get all properties")
+    public List<Property> getAllDPs() { return mongoService.getAllProperties(); }
 
     @GraphQLQuery(name = "getDPWithPartner")
     public List<DPData> getDPWithPartner(@GraphQLArgument(name = "partner") String partner) {return mongoService.getDPWithPartner(partner);}

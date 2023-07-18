@@ -42,13 +42,16 @@ public class MongoService implements IMongoService {
     }
 
     @Override
-    public List<DPData> getAllDPs() {
-        Set<DPData> propertySet = new HashSet<>();
-        FindIterable<DPData> DPs = collection.find();
-        for(DPData dp:DPs){
-            if(!dp.getProperty().contains("_ALL-PARTNERS")) propertySet.add(dp);
+    public List<Property> getAllProperties() {
+        MongoClient mongoClient = getMongoClient();
+        MongoDatabase db = mongoClient.getDatabase(MONGO_DATABASE);
+        MongoCollection<Property> propCollection= db.getCollection("Properties", Property.class);
+        FindIterable<Property> props = propCollection.find();
+        List<Property> propList = new ArrayList<>();
+        for(Property prop:props){
+            propList.add(prop);
         }
-        return new ArrayList<>(propertySet);
+        return propList;
     }
 
     @Override
@@ -204,9 +207,9 @@ public class MongoService implements IMongoService {
         return  MongoClients.create(clientSettings);
     }
 
-    List<DPData> FindIterableToList(FindIterable<DPData> DPs) {
-        List<DPData> list = new ArrayList<DPData>();
-        for (DPData dp : DPs) list.add(dp);
+    public static List<DPData> FindIterableToList(FindIterable<DPData> findIterable) {
+        List<DPData> list = new ArrayList<>();
+        for ( DPData dp : findIterable) list.add(dp);
         return list;
     }
 }

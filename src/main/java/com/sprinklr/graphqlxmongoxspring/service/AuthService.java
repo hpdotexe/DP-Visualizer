@@ -53,11 +53,11 @@ public class AuthService {
     }
 
     private static Map<String,String> extractJWT(String accessToken){
-        Map<String,String> userInfo = new HashMap<>();
         String[] chunks = accessToken.split("\\.");
         Base64.Decoder decoder = Base64.getUrlDecoder();
         JSONObject payload = new JSONObject(new String(decoder.decode(chunks[1])));
 
+        Map<String,String> userInfo = new HashMap<>();
         fillUserInfo(accessToken, userInfo, payload);
         fillPermissionInfo(userInfo, payload);
 
@@ -110,7 +110,7 @@ public class AuthService {
             algorithm = Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey(), null);
             algorithm.verify(jwt);// if the token signature is invalid, the method will throw SignatureVerificationException
             System.out.println("Token Validated!");
-            return Objects.equals(extractJWT(token).get("appid"), dotenv.get("CLIENT.ID"));
+            return Objects.equals(extractJWT(token).get("appid"), CLIENT_ID) && isSessionActive(token);
 
         } catch (MalformedURLException | JwkException e) {
             e.printStackTrace();
