@@ -178,7 +178,7 @@ public class MongoService implements IMongoService {
                 temp.setModifiedTime(dp.getModifiedTime());
                 temp.setReason(dp.getReason());
                 if(Objects.equals(mode, "Append"))appendUtil(temp);
-                else if(Objects.equals(mode, "Delete")) deleteUtil(dp);
+                else if(Objects.equals(mode, "Delete")) deleteUtil(temp);
                 collection.deleteOne(eq("_id", temp.getId()));
                 collection.insertOne(temp);
             }
